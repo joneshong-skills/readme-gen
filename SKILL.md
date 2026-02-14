@@ -1,0 +1,171 @@
+---
+name: readme-gen
+description: >-
+  This skill should be used when the user asks to "generate a README", "create a README",
+  "write project documentation", "update README", "produce README", "scaffold README",
+  "README generation", "產生 README", "建立 README", "寫專案文件", "更新 README",
+  mentions README generation, or discusses creating or updating
+  project documentation for a repository.
+version: 0.1.1
+tools: Read, Write, Glob, Grep, Bash
+---
+
+# README Generator
+
+Generate professional README.md files by analyzing a repository's structure, dependencies, and existing documentation.
+
+## Workflow
+
+### Phase 1: Project Analysis
+
+Scan the repository to understand what the project is and how it works.
+
+1. **Detect project type** by checking for manifest files:
+   - `package.json` -> Node.js / JavaScript / TypeScript
+   - `Cargo.toml` -> Rust
+   - `go.mod` -> Go
+   - `pyproject.toml` / `setup.py` / `requirements.txt` -> Python
+   - `Gemfile` -> Ruby
+   - `pom.xml` / `build.gradle` -> Java / Kotlin
+   - `*.csproj` / `*.sln` -> .NET / C#
+   - `CMakeLists.txt` / `Makefile` -> C / C++
+   - `pubspec.yaml` -> Dart / Flutter
+   - `Package.swift` -> Swift
+
+2. **Read manifest files** to extract: project name, version, description, license, dependencies, scripts, commands, entry points.
+
+3. **Scan directory structure** (`ls`, Glob for `src/**`, `lib/**`, `cmd/**`, etc.) to understand architecture — identify entry points, modules, config files, test directories.
+
+4. **Check for existing docs**: current README.md, CONTRIBUTING.md, LICENSE, docs/ folder, examples/ folder, CHANGELOG.md.
+
+5. **Identify CI/CD**: `.github/workflows/`, `.gitlab-ci.yml`, `Dockerfile`, `docker-compose.yml`.
+
+6. **Sample real code**: Read main entry point and 2-3 key source files to extract realistic usage examples and understand the public API.
+
+### Phase 2: Determine Style
+
+Ask the user or infer from project complexity:
+
+| Style | Target Length | When to Use |
+|---|---|---|
+| **minimal** | ~50 lines | Small utilities, single-purpose tools, scripts |
+| **standard** | ~150 lines | Libraries, CLI tools, typical open-source projects |
+| **comprehensive** | ~300+ lines | Frameworks, platforms, projects with complex APIs |
+
+Default to **standard** if not specified. If the project has fewer than 5 source files, lean toward minimal. If it has extensive API surface or multiple packages, lean toward comprehensive.
+
+### Phase 3: Generate README
+
+Write the README.md with these sections in order. Omit sections that do not apply.
+
+#### Section Reference
+
+1. **Title + Badges**
+   - H1 with project name
+   - Badge row using shields.io (see Badge Patterns below)
+
+2. **Description**
+   - One-line tagline (from manifest description or inferred)
+   - 2-4 sentence overview explaining what it does and why it exists
+
+3. **Features**
+   - Bullet list of key capabilities derived from code analysis
+   - Keep to 4-8 items; be specific, not generic
+
+4. **Prerequisites + Installation**
+   - Runtime requirements (Node >= 18, Rust stable, etc.)
+   - Install command (`npm install`, `cargo add`, `pip install`, etc.)
+   - For libraries: show dependency manager command
+   - For applications: show clone + build steps
+
+5. **Quick Start / Usage**
+   - Minimal working code example pulled or adapted from actual source
+   - For CLIs: show 2-3 common command invocations
+   - For libraries: show import + basic usage
+   - Use the project's actual module/package name
+
+6. **Configuration**
+   - Environment variables (scan for `process.env`, `os.Getenv`, `std::env`, etc.)
+   - Config file format if applicable
+   - Table format: Variable | Description | Default
+
+7. **API Reference**
+   - Only for libraries with public API surface
+   - Document key exported functions/types with signatures
+   - Link to full generated docs if available (rustdoc, typedoc, etc.)
+
+8. **Architecture**
+   - Brief description of how the project is structured
+   - Suggest using `diagram-gen` skill to create a Mermaid architecture diagram
+   - Example prompt: "Use diagram-gen to create an architecture diagram for this project"
+
+9. **Contributing**
+   - Reference CONTRIBUTING.md if it exists
+   - Otherwise: fork, branch, PR workflow in 4-5 steps
+   - Mention test commands from manifest (e.g., `npm test`, `cargo test`)
+
+10. **License**
+    - Detect from LICENSE file or manifest field
+    - One-line statement with link to LICENSE file
+
+### Badge Patterns
+
+Use shields.io with these common patterns:
+
+```markdown
+<!-- Version / Registry -->
+![npm version](https://img.shields.io/npm/v/PACKAGE)
+![crates.io](https://img.shields.io/crates/v/PACKAGE)
+![PyPI](https://img.shields.io/pypi/v/PACKAGE)
+
+<!-- CI -->
+![CI](https://img.shields.io/github/actions/workflow/status/OWNER/REPO/WORKFLOW.yml?branch=main)
+
+<!-- License -->
+![License](https://img.shields.io/github/license/OWNER/REPO)
+
+<!-- Quality -->
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Rust](https://img.shields.io/badge/Rust-stable-orange)
+```
+
+Only include badges that are verifiable — do not guess at CI workflow filenames without checking `.github/workflows/`.
+
+### Tech Stack Detection Heuristics
+
+After identifying the project type, adjust content accordingly:
+
+- **Node.js**: Check for `tsconfig.json` (TypeScript), framework (`next`, `express`, `fastify` in deps), bundler (`vite`, `webpack`, `esbuild`), test runner (`jest`, `vitest`, `mocha`).
+- **Rust**: Check for `[[bin]]` vs `[lib]` in Cargo.toml, workspace members, feature flags.
+- **Python**: Check for `[tool.poetry]`, `[build-system]`, framework (`fastapi`, `flask`, `django`), type checking (`mypy`, `pyright`).
+- **Go**: Check for `cmd/` directory (CLI), `internal/` (library pattern), `go generate` usage.
+- **Monorepo**: Check for `workspaces` in package.json, `pnpm-workspace.yaml`, `Cargo.toml` with `[workspace]`, `lerna.json`.
+
+## Key Principles
+
+- **Use real code**: Extract actual imports, function names, and patterns from the codebase. Never invent fictional API examples.
+- **Match the project's voice**: If the existing README or comments are casual, stay casual. If formal, stay formal.
+- **Proportional depth**: A 200-line CLI tool does not need a 300-line README. Scale sections to match project complexity.
+- **Verify before badge**: Only add badges for services actually configured in the repo.
+- **Working examples**: Every code block should be copy-pasteable and functional.
+- **No empty sections**: If a section has nothing meaningful to say, omit it entirely.
+- **Suggest diagrams**: For projects with non-trivial architecture, recommend using the `diagram-gen` skill to produce an architecture diagram to embed in the README.
+
+## Continuous Improvement
+
+This skill evolves with each use. After every invocation:
+
+1. **Reflect** — Identify what worked, what caused friction, and any unexpected issues
+2. **Record** — Append a concise lesson to `lessons.md` in this skill's directory
+3. **Refine** — When a pattern recurs (2+ times), update SKILL.md directly
+
+### lessons.md Entry Format
+
+```
+### YYYY-MM-DD — Brief title
+- **Friction**: What went wrong or was suboptimal
+- **Fix**: How it was resolved
+- **Rule**: Generalizable takeaway for future invocations
+```
+
+Accumulated lessons signal when to run `/skill-optimizer` for a deeper structural review.
