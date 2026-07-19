@@ -1,13 +1,9 @@
 ---
 name: readme-gen
-description: >-
-  This skill should be used when the user asks to "generate a README", "create a README",
-  "write project documentation", "update README", "produce README", "scaffold README",
-  "README generation", "產生 README", "建立 README", "寫專案文件", "更新 README",
-  mentions README generation, or discusses creating or updating
-  project documentation for a repository.
+description: "readme, gen, generate, create, write, project, documentation, 產生"
 version: 0.2.0
 tools: Read, Write, Glob, Grep, Bash, sandbox_execute
+disable-model-invocation: true
 ---
 
 # README Generator
@@ -72,9 +68,12 @@ Write the README.md with these sections in order. Omit sections that do not appl
 
 #### Section Reference
 
-1. **Title + Badges**
+1. **Title + Icon + Badges** (MANDATORY format)
    - H1 with project name
-   - Badge row using shields.io (see Badge Patterns below)
+   - Centered icon: `<p align="center"><img src="..." alt="icon" width="200"/></p>`
+   - Language switcher (if bilingual): `<p align="center"><a href="README.md">English</a> | <a href="README.zh.md">繁體中文</a></p>`
+   - Centered badge row using HTML `<p align="center">` with `<a>` + `<img>` (NOT markdown `![]()`)
+   - See Badge Patterns below for template
 
 2. **Description**
    - One-line tagline (from manifest description or inferred)
@@ -122,26 +121,62 @@ Write the README.md with these sections in order. Omit sections that do not appl
 
 ### Badge Patterns
 
-Use shields.io with these common patterns:
+**MANDATORY: Use HTML `<p align="center">` format, NOT markdown `![]()` syntax.**
 
-```markdown
-<!-- Version / Registry -->
-![npm version](https://img.shields.io/npm/v/PACKAGE)
-![crates.io](https://img.shields.io/crates/v/PACKAGE)
-![PyPI](https://img.shields.io/pypi/v/PACKAGE)
+Template (standard format):
+```html
+# project-name
 
-<!-- CI -->
-![CI](https://img.shields.io/github/actions/workflow/status/OWNER/REPO/WORKFLOW.yml?branch=main)
+<p align="center">
+  <img src="docs/icon.png" alt="project-name icon" width="200"/>
+</p>
 
-<!-- License -->
-![License](https://img.shields.io/github/license/OWNER/REPO)
+<p align="center">
+  <strong><a href="README.md">English</a></strong>
+  &nbsp;|&nbsp;
+  <a href="README.zh.md">繁體中文</a>
+</p>
 
-<!-- Quality -->
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![Rust](https://img.shields.io/badge/Rust-stable-orange)
+<p align="center">
+  <!-- Version / Registry (pick one) -->
+  <a href="https://www.npmjs.com/package/PACKAGE">
+    <img alt="npm version" src="https://img.shields.io/npm/v/PACKAGE?style=flat-square">
+  </a>
+  <a href="https://pypi.org/project/PACKAGE/">
+    <img alt="PyPI version" src="https://badge.fury.io/py/PACKAGE.svg">
+  </a>
+  <!-- Language -->
+  <a href="https://www.python.org/">
+    <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-blue?style=flat-square">
+  </a>
+  <!-- License -->
+  <a href="https://opensource.org/licenses/MIT">
+    <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
+  </a>
+  <!-- Stars -->
+  <a href="https://github.com/OWNER/REPO/stargazers">
+    <img alt="Stars" src="https://img.shields.io/github/stars/OWNER/REPO?style=flat-square">
+  </a>
+  <!-- DeepWiki (AUTO-ADD for all public repos) -->
+  <a href="https://deepwiki.com/OWNER/REPO">
+    <img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg">
+  </a>
+</p>
 ```
 
-Only include badges that are verifiable — do not guess at CI workflow filenames without checking `.github/workflows/`.
+Common badge sources:
+- **Version**: shields.io (`npm/v`, `crates/v`, `pypi/v`) or badge.fury.io
+- **CI**: `github/actions/workflow/status/OWNER/REPO/WORKFLOW.yml?branch=main`
+- **License**: `badge/license-MIT-green` (match actual license)
+- **Language**: `badge/python-3.12%2B-blue`, `badge/TypeScript-5.0-blue`, `badge/Rust-stable-orange`
+- **Stars**: `github/stars/OWNER/REPO`
+- **DeepWiki**: `https://deepwiki.com/badge.svg` → link to `https://deepwiki.com/OWNER/REPO`
+
+Rules:
+- Only include badges that are verifiable — do not guess at CI workflow filenames without checking `.github/workflows/`
+- **DeepWiki badge**: Auto-include for ALL public repos (operonlab/* and JonesHong/*)
+- Use `style=flat-square` for consistency (except DeepWiki which has its own SVG)
+- Images/screenshots in body: use `<p align="center"><img width="..." /></p>`, NOT markdown `![]()`
 
 ### Tech Stack Detection Heuristics
 
