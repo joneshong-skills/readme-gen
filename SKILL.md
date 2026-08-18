@@ -3,7 +3,6 @@ name: readme-gen
 description: "readme, gen, generate, create, write, project, documentation, 產生"
 version: 0.2.0
 tools: Read, Write, Glob, Grep, Bash, sandbox_execute
-disable-model-invocation: true
 ---
 
 # README Generator
