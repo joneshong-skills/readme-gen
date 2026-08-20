@@ -173,7 +173,7 @@ Common badge sources:
 
 Rules:
 - Only include badges that are verifiable — do not guess at CI workflow filenames without checking `.github/workflows/`
-- **DeepWiki badge**: Auto-include for ALL public repos (operonlab/* and JonesHong/*)
+- **DeepWiki badge**: Auto-include for all public repos under your own orgs
 - Use `style=flat-square` for consistency (except DeepWiki which has its own SVG)
 - Images/screenshots in body: use `<p align="center"><img width="..." /></p>`, NOT markdown `![]()`
 
